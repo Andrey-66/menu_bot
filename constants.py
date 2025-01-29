@@ -11,3 +11,4 @@ SPREADSHEET_RANGE_COCKTAILS = "'Настройки'!B2:B"
 SPREADSHEET_RANGE_AVAILABLE_COCKTAILS = "'Меню'!A2:A"
 MENU_TITLE = '📖 МЕНЮ:\n'
 COCKTAIL_SMILE = '🍹'
+MEDIA_DIR = 'media'

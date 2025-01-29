@@ -11,7 +11,7 @@ from constants import (MENU_TITLE, SPREADSHEET_ID,
                        SPREADSHEET_RANGE_AVAILABLE_COCKTAILS,
                        SPREADSHEET_RANGE_COCKTAILS,
                        SPREADSHEET_RANGE_INGREDIENTS,
-                       SPREADSHEET_RANGE_RECIPES)
+                       SPREADSHEET_RANGE_RECIPES, MEDIA_DIR)
 from spreadsheets import google_auth, read_menu, read_sheet
 from utils import (build_menu_buttons, menu_dict_to_str, str_to_markdown,
                    update_message)
@@ -62,7 +62,6 @@ async def show_menu_list(query: CallbackQuery) -> None:
 
 
 async def show_menu(query: CallbackQuery, text='Нажми на коктейль, чтобы узнать подробнее') -> None:
-    print(text)
     menu = read_menu(SERVICE, SPREADSHEET_ID, SPREADSHEET_RANGE_RECIPES, SPREADSHEET_RANGE_INGREDIENTS)
     buttons = build_menu_buttons(menu)
     await update_message(query, buttons, text)
@@ -79,12 +78,11 @@ async def show_cocktail(query: CallbackQuery) -> None:
         query.data: menu.get(query.data)
     }
     text = menu_dict_to_str(cocktail)
-    if query.message.reply_markup != buttons:
-        await query.edit_message_text(
-            text=text,
-            reply_markup=buttons,
-            parse_mode='MarkdownV2'
-        )
+    file_path = f'{MEDIA_DIR}/{query.data}.jpg'
+    file = None
+    if os.path.exists(file_path):
+        file = open(file_path, 'rb')
+    await update_message(query, buttons, text, parse_mode='MarkdownV2', media=file)
 
 
 async def buttons_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -97,7 +95,6 @@ async def buttons_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await context.bot.send_chat_action(chat_id=chat.id, action='typing')
     query = update.callback_query
     await query.answer()
-    print(query.data)
     if query.data in FUNCTIONS.keys():
         await FUNCTIONS[query.data](query)
     else:
