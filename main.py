@@ -26,33 +26,25 @@ async def wake_up(update: Update, context: ContextTypes.DEFAULT_TYPE):
     buttons = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton(
-                    "Показать меню", callback_data="action_selection_menu"
-                ),
+                InlineKeyboardButton("Показать меню", callback_data="action_selection_menu"),
             ],
         ]
     )
-    await context.bot.send_message(
-        chat_id=chat.id, text="Спасибо, что включили меня", reply_markup=buttons
-    )
+    await context.bot.send_message(chat_id=chat.id, text="Спасибо, что включили меня", reply_markup=buttons)
 
 
 async def error(query: CallbackQuery):
     buttons = InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton(
-                    "Показать меню", callback_data="action_selection_menu"
-                ),
+                InlineKeyboardButton("Показать меню", callback_data="action_selection_menu"),
             ],
         ]
     )
     await update_message(query, buttons, "Что-то пошло не так, начнём с начала?")
 
 
-async def show_menu_list(
-    query: CallbackQuery, text: Optional[str] = MENU_TITLE
-) -> None:
+async def show_menu_list(query: CallbackQuery, text: Optional[str] = MENU_TITLE) -> None:
     if text is None:
         text = ""
     buttons = InlineKeyboardMarkup(
@@ -111,15 +103,11 @@ async def show_cocktail(query: CallbackQuery) -> None:
     cocktail = {query.data: menu.get(query.data)}
     text = menu_dict_to_str(cocktail)
     if query.message.reply_markup != buttons:
-        await query.edit_message_text(
-            text=text, reply_markup=buttons, parse_mode="MarkdownV2"
-        )
+        await query.edit_message_text(text=text, reply_markup=buttons, parse_mode="MarkdownV2")
 
 
 async def buttons_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    FUNCTIONS: Dict[
-        str, Callable[[CallbackQuery, Optional[str]], Coroutine[Any, Any, None]]
-    ] = {
+    FUNCTIONS: Dict[str, Callable[[CallbackQuery, Optional[str]], Coroutine[Any, Any, None]]] = {
         "update_list": show_menu_list,
         "show_menu_list": show_menu_list,
         "action_selection_menu": show_menu,
@@ -132,12 +120,10 @@ async def buttons_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     if query.data in FUNCTIONS.keys():
         FUNCTIONS[query.data](query)  # type: ignore
     else:
-        cocktails_range = read_sheet(
-            SERVICE, SPREADSHEET_ID, SPREADSHEET_RANGE_COCKTAILS
-        ).get("values")
-        available_cocktails_range = read_sheet(
-            SERVICE, SPREADSHEET_ID, SPREADSHEET_RANGE_AVAILABLE_COCKTAILS
-        ).get("values")
+        cocktails_range = read_sheet(SERVICE, SPREADSHEET_ID, SPREADSHEET_RANGE_COCKTAILS).get("values")
+        available_cocktails_range = read_sheet(SERVICE, SPREADSHEET_ID, SPREADSHEET_RANGE_AVAILABLE_COCKTAILS).get(
+            "values"
+        )
         cocktails = set()
         available_cocktails = set()
         for row in available_cocktails_range:

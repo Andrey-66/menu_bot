@@ -19,9 +19,7 @@ def menu_dict_to_str(menu: Dict[str, List[str]], menu_title: str = "") -> str:
     if menu_title != "":
         answer = "*" + menu_title + "*"
     for cocktail in menu.keys():
-        answer += (
-            str_to_markdown(COCKTAIL_SMILE) + "*" + str_to_markdown(cocktail) + "*\n"
-        )
+        answer += str_to_markdown(COCKTAIL_SMILE) + "*" + str_to_markdown(cocktail) + "*\n"
         for ingredient in menu.get(cocktail, []):
             answer += str_to_markdown("- " + ingredient) + "\n"
     return answer
@@ -51,35 +49,25 @@ def build_menu_buttons(menu: Dict[str, List[str]]) -> InlineKeyboardMarkup:
         buttons.append(
             [
                 InlineKeyboardButton(cocktails[i * 2], callback_data=cocktails[i * 2]),
-                InlineKeyboardButton(
-                    cocktails[i * 2 + 1], callback_data=cocktails[i * 2 + 1]
-                ),
+                InlineKeyboardButton(cocktails[i * 2 + 1], callback_data=cocktails[i * 2 + 1]),
             ]
         )
 
     if len(cocktails) % 2 > 0:
-        buttons.append(
-            ([InlineKeyboardButton(cocktails[-1], callback_data=cocktails[-1])])
-        )
+        buttons.append(([InlineKeyboardButton(cocktails[-1], callback_data=cocktails[-1])]))
         buttons.append(
             [
-                InlineKeyboardButton(
-                    "Показать списком", callback_data="show_menu_list"
-                ),
+                InlineKeyboardButton("Показать списком", callback_data="show_menu_list"),
                 InlineKeyboardButton("Обновить", callback_data="action_selection_menu"),
             ]
         )
     return InlineKeyboardMarkup(buttons)
 
 
-async def update_message(
-    query: CallbackQuery, buttons: InlineKeyboardMarkup, text: str, parse_mode=None
-) -> None:
+async def update_message(query: CallbackQuery, buttons: InlineKeyboardMarkup, text: str, parse_mode=None) -> None:
     if query.message.reply_markup == buttons and query.message.text == text:
         return
     if parse_mode:
-        await query.edit_message_text(
-            text=text, reply_markup=buttons, parse_mode=parse_mode
-        )
+        await query.edit_message_text(text=text, reply_markup=buttons, parse_mode=parse_mode)
     else:
         await query.edit_message_text(text=text, reply_markup=buttons)

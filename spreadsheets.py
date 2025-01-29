@@ -5,9 +5,7 @@ from utils import range_to_dict
 
 
 def google_auth():
-    credentials = Credentials.from_service_account_file(
-        filename=GOOGLE_CREDENTIALS_FILE, scopes=GOOGLE_SCOPES
-    )
+    credentials = Credentials.from_service_account_file(filename=GOOGLE_CREDENTIALS_FILE, scopes=GOOGLE_SCOPES)
     service = discovery.build("sheets", "v4", credentials=credentials)
     return service, credentials
 
