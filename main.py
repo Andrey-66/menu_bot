@@ -118,9 +118,8 @@ async def buttons_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await context.bot.send_chat_action(chat_id=chat.id, action="typing")
     query = update.callback_query
     await query.answer()
-    print(query.data)
     if query.data in FUNCTIONS.keys():
-        FUNCTIONS[query.data](query)  # type: ignore
+        await FUNCTIONS[query.data](query)  # type: ignore
     else:
         cocktails_range = read_sheet(SERVICE, SPREADSHEET_ID, SPREADSHEET_RANGE_COCKTAILS).get("values")
         available_cocktails_range = read_sheet(SERVICE, SPREADSHEET_ID, SPREADSHEET_RANGE_AVAILABLE_COCKTAILS).get(
