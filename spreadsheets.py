@@ -1,7 +1,7 @@
 from google.oauth2.service_account import Credentials
 from googleapiclient import discovery
 
-from constants import GOOGLE_SCOPES, GOOGLE_CREDENTIALS_FILE
+from constants import GOOGLE_CREDENTIALS_FILE, GOOGLE_SCOPES
 from utils import range_to_dict
 
 
@@ -18,7 +18,7 @@ def read_menu(service, spreadsheet_id, recipe_range, ingredients_range):
     return range_to_dict(recipes.get('values'), ingredients.get('values'))
 
 
-def read_cocktails_id(service, spreadsheet_id, cocktails_range):  # TODO DELETE
+def read_cocktails_id(service, spreadsheet_id, cocktails_range):
     cocktails = read_sheet(service, spreadsheet_id, cocktails_range)
     answer = {}
     for row in cocktails:

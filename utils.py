@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from telegram import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 
 from constants import COCKTAIL_SMILE
 
@@ -70,9 +70,3 @@ async def update_message(query: CallbackQuery, buttons: InlineKeyboardMarkup, te
             text=text,
             reply_markup=buttons
         )
-
-
-if __name__ == "__main__":
-    build_menu_buttons({'Пабло Эскобар': ['Текила', 'Сироп кокос', 'Лимонный сок', 'Сок грейпфрут', 'Сок ананас'],
-                        'Пабло Эскобар1': ['Текила', 'Сироп кокос', 'Лимонный сок', 'Сок грейпфрут', 'Сок ананас'],
-                        'Пабло Эскобар2': ['Текила', 'Сироп кокос', 'Лимонный сок', 'Сок грейпфрут', 'Сок ананас']})

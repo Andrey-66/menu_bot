@@ -2,13 +2,19 @@ import os
 from datetime import datetime
 
 from dotenv import load_dotenv
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton, Update, ReplyKeyboardRemove, CallbackQuery
-from telegram.ext import MessageHandler, CommandHandler, CallbackQueryHandler, ContextTypes, Application, filters
+from telegram import (CallbackQuery, InlineKeyboardButton,
+                      InlineKeyboardMarkup, Update)
+from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
+                          ContextTypes)
 
-from constants import SPREADSHEET_ID, SPREADSHEET_RANGE_INGREDIENTS, SPREADSHEET_RANGE_RECIPES, \
-    SPREADSHEET_RANGE_COCKTAILS, SPREADSHEET_RANGE_AVAILABLE_COCKTAILS, MENU_TITLE
-from spreadsheets import google_auth, read_menu, read_cocktails_id, read_sheet
-from utils import str_to_markdown, range_to_dict, menu_dict_to_str, build_menu_buttons, update_message
+from constants import (MENU_TITLE, SPREADSHEET_ID,
+                       SPREADSHEET_RANGE_AVAILABLE_COCKTAILS,
+                       SPREADSHEET_RANGE_COCKTAILS,
+                       SPREADSHEET_RANGE_INGREDIENTS,
+                       SPREADSHEET_RANGE_RECIPES)
+from spreadsheets import google_auth, read_menu, read_sheet
+from utils import (build_menu_buttons, menu_dict_to_str, str_to_markdown,
+                   update_message)
 
 load_dotenv()
 
@@ -119,7 +125,6 @@ def main() -> None:
     application = Application.builder().token(auth_token).build()
     application.add_handler(CallbackQueryHandler(buttons_handler))
     application.add_handler(CommandHandler('start', wake_up))
-    # application.add_handler(CommandHandler('menu', show_menu)) TODO
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
