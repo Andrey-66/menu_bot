@@ -1,9 +1,11 @@
 ---
 #@generated
-name: Lint Code Base
+name: Lint and Push
 on:
-  push: null
-  pull_request: null
+  push:
+    branches: ["main", "cd/docker_initial"]
+  pull_request:
+    branches: ["main", "cd/docker_initial"]
 jobs:
   lint:
     name: lint
