@@ -1,9 +1,11 @@
 ---
 #@generated
-name: Lint Code Base
+name: Lint and Push
 on:
-  push: null
-  pull_request: null
+  push:
+    branches: ["main", "cd/docker_initial"]
+  pull_request:
+    branches: ["main", "cd/docker_initial"]
 jobs:
   lint:
     name: lint
@@ -50,3 +52,30 @@ jobs:
           context: .
           push: true
           tags: andrey66/menu_bot:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - build_and_push_to_docker_hub
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Copy docker-compose.yml via ssh
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          source: "docker-compose.production.yml"
+          target: "menu_bot"
+      - name: Executing remote ssh commands to deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            cd menu_bot
+            sudo docker compose -f docker-compose.production.yml pull
+            sudo docker compose -f docker-compose.production.yml down
+            sudo docker compose -f docker-compose.production.yml up -d
