@@ -55,12 +55,12 @@ def build_menu_buttons(menu: Dict[str, List[str]]) -> InlineKeyboardMarkup:
 
     if len(cocktails) % 2 > 0:
         buttons.append(([InlineKeyboardButton(cocktails[-1], callback_data=cocktails[-1])]))
-        buttons.append(
-            [
-                InlineKeyboardButton("Показать списком", callback_data="show_menu_list"),
-                InlineKeyboardButton("Обновить", callback_data="action_selection_menu"),
-            ]
-        )
+    buttons.append(
+        [
+            InlineKeyboardButton("Показать списком", callback_data="show_menu_list"),
+            InlineKeyboardButton("Обновить", callback_data="action_selection_menu"),
+        ]
+    )
     return InlineKeyboardMarkup(buttons)
 
 
