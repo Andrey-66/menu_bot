@@ -3,7 +3,7 @@
 name: Lint and Push
 on:
   push: null
-  pull_request: null
+  pull_request: null # Возможно лишнее TODO
 
 permissions:
   contents: read  # Чтение репозитория
