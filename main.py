@@ -3,13 +3,12 @@ from datetime import datetime
 from typing import Any, Callable, Coroutine, Dict, Optional
 
 from constants import (
-    MEDIA_DIR,
     MENU_TITLE,
     SPREADSHEET_ID,
     SPREADSHEET_RANGE_AVAILABLE_COCKTAILS,
     SPREADSHEET_RANGE_COCKTAILS,
     SPREADSHEET_RANGE_INGREDIENTS,
-    SPREADSHEET_RANGE_RECIPES,
+    SPREADSHEET_RANGE_RECIPES, MEDIA_DIR,
 )
 from dotenv import load_dotenv
 from spreadsheets import google_auth, read_menu, read_sheet
@@ -31,7 +30,6 @@ async def wake_up(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ],
         ]
     )
-    await context.bot.send_message(chat_id=chat.id, text="Спасибо, что включили меня", reply_markup=buttons)
 
 
 async def error(query: CallbackQuery):
@@ -107,7 +105,7 @@ async def show_cocktail(query: CallbackQuery) -> None:
     file = None
     if os.path.exists(file_path):
         file = open(file_path, "rb")
-    await update_message(query, buttons, text, parse_mode="MarkdownV2", media=file)
+    await update_message(query, buttons, text, parse_mode='MarkdownV2', media=file)
 
 
 async def buttons_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -145,10 +143,10 @@ async def buttons_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 def main() -> None:
     auth_token = os.getenv("TOKEN")
-    application = Application.builder().token(auth_token).read_timeout(30).connect_timeout(30).build()
+    application = Application.builder().token(auth_token).build()
     application.add_handler(CallbackQueryHandler(buttons_handler))
     application.add_handler(CommandHandler("start", wake_up))
-    application.run_polling(allowed_updates=Update.ALL_TYPES, timeout=30)
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
 if __name__ == "__main__":
