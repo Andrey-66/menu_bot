@@ -36,6 +36,7 @@ jobs:
     if: failure()
     steps:
       - name: Post comment to PR
+        if: github.event.pull_request != null  # Проверка, что это PR
         uses: peter-evans/create-or-update-comment@v3
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -43,6 +44,7 @@ jobs:
             🚨 Linter has failed! Please fix the formatting issues before merging.
 
       - name: Close PR if Linter fails
+        if: github.event.pull_request != null  # Проверка, что это PR
         uses: octokit/request-action@v2.x
         with:
           route: POST /repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/merge
