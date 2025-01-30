@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  backend:
+    image: andrey66/menu_bot
+    env_file:
+      - .env
+    volumes:
+      - ./yabar-bot-2edc386bc135.json:/app/yabar-bot-2edc386bc135.json
