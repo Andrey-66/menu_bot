@@ -68,7 +68,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.SSH_PASSPHRASE }}
           source: "docker-compose.production.yml"
           target: "menu_bot/docker-compose.production.yml"
 #      - name: Copy docker-compose.yml via ssh
