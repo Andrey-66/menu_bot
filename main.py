@@ -75,7 +75,7 @@ async def show_menu_list(query: CallbackQuery, text: Optional[str] = MENU_TITLE)
 
 async def show_menu(
     query: CallbackQuery,
-    text: Optional[str] = "1111Нажми на коктейль, чтобы узнать подробнее",
+    text: Optional[str] = "Нажми на коктейль, чтобы узнать подробнее",
 ) -> None:
     menu = read_menu(
         SERVICE,
