@@ -45,6 +45,7 @@ jobs:
         if: github.event.pull_request != null  # Проверка, что это PR
         uses: peter-evans/create-or-update-comment@v3
         with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             🚨 Linter has failed! Please fix the formatting issues before merging.
@@ -53,6 +54,7 @@ jobs:
         if: github.event.pull_request != null  # Проверка, что это PR
         uses: octokit/request-action@v2.x
         with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
           route: POST /repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/merge
           method: PUT
           message: "Closing PR due to linter issues"
