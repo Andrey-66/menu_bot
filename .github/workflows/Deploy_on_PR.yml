@@ -3,7 +3,7 @@
 name: Deploy
 on:
   pull_request:
-    branches: ["main"]
+    branches: ["master"]
     types: [closed]  # Срабатывает только при закрытии PR
 
 permissions:
