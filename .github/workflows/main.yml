@@ -60,20 +60,13 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-      - name: Copy docker-compose.yml via ssh
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          password: ${{ secrets.PASSWORD }}
-          source: "docker-compose.production.yml"
-          target: "menu_bot"
+
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          password: ${{ secrets.SSH_PASSPHRASE }}
+          password: ${{ secrets.PASSWORD }}
           script: |
             cd menu_bot
             sudo docker compose -f docker-compose.production.yml pull
