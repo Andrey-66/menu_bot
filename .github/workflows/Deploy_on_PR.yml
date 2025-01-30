@@ -5,6 +5,12 @@ on:
   pull_request:
     branches: ["main"]
     types: [closed]  # Срабатывает только при закрытии PR
+
+permissions:
+  contents: read  # Чтение репозитория
+  issues: write   # Права на запись в issues (нужны для комментариев в PR)
+  pull-requests: write  # Права на изменение PR (нужны для их обновления)
+
 jobs:
   build_and_push_to_docker_hub:
     name: Push Docker image to DockerHub

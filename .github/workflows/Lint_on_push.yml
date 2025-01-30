@@ -4,6 +4,12 @@ name: Lint and Push
 on:
   push: null
   pull_request: null
+
+permissions:
+  contents: read  # Чтение репозитория
+  issues: write   # Права на запись в issues (нужны для комментариев в PR)
+  pull-requests: write  # Права на изменение PR (нужны для их обновления)
+
 jobs:
   lint:
     name: lint
