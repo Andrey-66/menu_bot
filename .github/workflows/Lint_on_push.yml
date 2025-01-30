@@ -3,12 +3,11 @@
 name: Lint and Push
 on:
   push: null
-  pull_request: null # Возможно лишнее TODO
 
 permissions:
-  contents: read  # Чтение репозитория
-  issues: write   # Права на запись в issues (нужны для комментариев в PR)
-  pull-requests: write  # Права на изменение PR (нужны для их обновления)
+  contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
   lint:
@@ -42,21 +41,10 @@ jobs:
     if: failure()
     steps:
       - name: Post comment to PR
-        if: github.event.pull_request != null  # Проверка, что это PR
+        if: github.event.pull_request != null
         uses: peter-evans/create-or-update-comment@v3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             🚨 Linter has failed! Please fix the formatting issues before merging.
-# TODO
-#      - name: Close PR if Linter fails
-#        if: github.event.pull_request != null  # Проверка, что это PR
-#        uses: octokit/request-action@v2.x
-#        with:
-#          repo-token: ${{ secrets.GITHUB_TOKEN }}
-#          route: POST /repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/merge
-#          method: PUT
-#          message: "Closing PR due to linter issues"
-#          sha: ${{ github.sha }}
-#          base: ${{ github.event.pull_request.base.ref }}
