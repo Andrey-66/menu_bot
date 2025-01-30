@@ -42,7 +42,7 @@ async def error(query: CallbackQuery):
             ],
         ]
     )
-    await update_message(query,              buttons, "Что-то пошло не так, начнём с начала?")
+    await update_message(query, buttons, "Что-то пошло не так, начнём с начала?")
 
 
 async def show_menu_list(query: CallbackQuery, text: Optional[str] = MENU_TITLE) -> None:
