@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Any, Callable, Coroutine, Dict, Optional
+from typing import Any, Callable, Coroutine, Dict, List, Optional
 
 from constants import (
     MEDIA_DIR,
@@ -12,17 +12,17 @@ from constants import (
     SPREADSHEET_RANGE_RECIPES,
 )
 from dotenv import load_dotenv
+from logger import LOGGER, logger_init
 from spreadsheets import google_auth, read_menu, read_sheet
 from telegram import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes
 from utils import build_menu_buttons, menu_dict_to_str, str_to_markdown, update_message
 
 load_dotenv()
-
 SERVICE, CREDENTIALS = google_auth()
 
 
-async def wake_up(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def wake_up(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat = update.effective_chat
     buttons = InlineKeyboardMarkup(
         [
@@ -31,10 +31,11 @@ async def wake_up(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ],
         ]
     )
+    LOGGER.info(f"Пользователь {chat.username} вошел в бота")
     await context.bot.send_message(chat_id=chat.id, text="Спасибо, что включили меня", reply_markup=buttons)
 
 
-async def error(query: CallbackQuery):
+async def error(query: CallbackQuery) -> None:
     buttons = InlineKeyboardMarkup(
         [
             [
@@ -42,12 +43,16 @@ async def error(query: CallbackQuery):
             ],
         ]
     )
+    LOGGER.info(f"У пользователя {query.from_user.username} произошла ошибка, query: {query.data}")
+    LOGGER.debug(f"query: {query.data}")
+    LOGGER.debug(f"buttons: {buttons}")
     await update_message(query, buttons, "Что-то пошло не так, начнём с начала?")
 
 
 async def show_menu_list(query: CallbackQuery, text: Optional[str] = MENU_TITLE) -> None:
     if text is None:
         text = ""
+        LOGGER.warning("show_menu_list: text is None")
     buttons = InlineKeyboardMarkup(
         [
             [
@@ -56,6 +61,9 @@ async def show_menu_list(query: CallbackQuery, text: Optional[str] = MENU_TITLE)
             ],
         ]
     )
+    LOGGER.info(f"Пользователь {query.from_user.username} запросил меню в виде списка")
+    LOGGER.debug(f"query: {query.data}")
+    LOGGER.debug(f"buttons: {buttons}")
     await update_message(
         query,
         buttons,
@@ -86,6 +94,10 @@ async def show_menu(
     buttons = build_menu_buttons(menu)
     if text is None:
         text = ""
+    LOGGER.info(f"Пользователь {query.from_user.username} запросил меню")
+    LOGGER.debug(f"query: {query.data}")
+    LOGGER.debug(f"buttons: {buttons}")
+    LOGGER.debug(f"text: {text}")
     await update_message(query, buttons, text)
 
 
@@ -101,12 +113,15 @@ async def show_cocktail(query: CallbackQuery) -> None:
             [InlineKeyboardButton("Назад", callback_data="action_selection_menu")],
         ]
     )
-    cocktail = {query.data: menu.get(query.data)}
+    cocktail: Dict[str, List[str]] = {query.data: menu.get(query.data)}  # type: ignore
     text = menu_dict_to_str(cocktail)
     file_path = f"{MEDIA_DIR}/{query.data}.jpg"
     file = None
     if os.path.exists(file_path):
         file = open(file_path, "rb")
+    else:
+        LOGGER.warning(f"Файл для {query.data} не найден")
+    LOGGER.info(f"Пользователь {query.from_user.username} запросил коктейль {query.data}")
     await update_message(query, buttons, text, parse_mode="MarkdownV2", media=file)
 
 
@@ -120,6 +135,7 @@ async def buttons_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await context.bot.send_chat_action(chat_id=chat.id, action="typing")
     query = update.callback_query
     await query.answer()
+    LOGGER.info(f"Пользователь {query.from_user.username} нажал кнопку {query.data}")
     if query.data in FUNCTIONS.keys():
         await FUNCTIONS[query.data](query)  # type: ignore
     else:
@@ -129,6 +145,14 @@ async def buttons_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         )
         cocktails = set()
         available_cocktails = set()
+        if available_cocktails_range is None:
+            LOGGER.error("available_cocktails_range is None")
+            await error(query)
+            return
+        if cocktails_range is None:
+            LOGGER.error("cocktails_range is None")
+            await error(query)
+            return
         for row in available_cocktails_range:
             if row[0]:
                 available_cocktails.add(row[0])
@@ -144,10 +168,12 @@ async def buttons_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 
 def main() -> None:
+    logger_init()
     auth_token = os.getenv("TOKEN")
     application = Application.builder().token(auth_token).read_timeout(30).connect_timeout(30).build()
     application.add_handler(CallbackQueryHandler(buttons_handler))
     application.add_handler(CommandHandler("start", wake_up))
+    LOGGER.info("Бот запущен")
     application.run_polling(allowed_updates=Update.ALL_TYPES, timeout=30)
 
 
