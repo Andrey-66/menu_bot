@@ -69,8 +69,14 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           password: ${{ secrets.SSH_PASSPHRASE }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "docker-compose.production.yml"
           target: "menu_bot/docker-compose.production.yml"
+      - name: Debug SSH connection
+        run: |
+          echo ${{ secrets.SSH_PRIVATE_KEY }} > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh -i ~/.ssh/id_rsa -v ${{ secrets.USER }}@${{ secrets.HOST }} "hostname"
 #      - name: Copy docker-compose.yml via ssh
 #        uses: appleboy/scp-action@master
 #        with:
