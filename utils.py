@@ -42,7 +42,7 @@ def range_to_dict(recipes_range, ingredients_range) -> Dict[str, List[str]]:
                 menu[cocktail] = [ingredient]
         else:
             menu[cocktail].append(ingredient)
-    LOGGER.debug(f"menu: {menu}")
+    LOGGER.debug("range_to_dict completed")
     return menu
 
 
