@@ -18,7 +18,6 @@ def google_auth() -> Tuple[Service, Credentials]:
 def read_menu(service, spreadsheet_id: str, recipe_range: str, ingredients_range: str) -> Dict[str, list[str]]:
     recipes = read_sheet(service, spreadsheet_id, recipe_range)
     ingredients = read_sheet(service, spreadsheet_id, ingredients_range)
-    LOGGER.debug(f"recipes: {recipes}")
     return range_to_dict(recipes.get("values"), ingredients.get("values"))
 
 
@@ -32,5 +31,5 @@ def read_sheet(service, spreadsheet_id: str, sheet_range: str) -> Dict[str, Any]
         )
     )
     result = request.execute()
-    LOGGER.debug(f"result: {result}")
+    LOGGER.debug(f"Result in range: {result.get('range')} is received")
     return result

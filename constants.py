@@ -1,3 +1,5 @@
+import logging
+
 GOOGLE_SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets.readonly",
     "https://www.googleapis.com/auth/drive.readonly",
@@ -12,3 +14,4 @@ SPREADSHEET_RANGE_AVAILABLE_COCKTAILS = "'Меню'!A2:A"
 MENU_TITLE = "📖 МЕНЮ:\n"
 COCKTAIL_SMILE = "🍹"
 MEDIA_DIR = "media"
+LOGGER_LEVEL = logging.INFO

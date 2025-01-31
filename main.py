@@ -1,5 +1,7 @@
 import os
+import threading
 from datetime import datetime
+from time import sleep
 from typing import Any, Callable, Coroutine, Dict, List, Optional
 
 from constants import (
@@ -20,6 +22,8 @@ from utils import build_menu_buttons, menu_dict_to_str, str_to_markdown, update_
 
 load_dotenv()
 SERVICE, CREDENTIALS = google_auth()
+MENU: Dict[str, List[str]] = {}
+lock = threading.Lock()
 
 
 async def wake_up(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -68,12 +72,7 @@ async def show_menu_list(query: CallbackQuery, text: Optional[str] = MENU_TITLE)
         query,
         buttons,
         menu_dict_to_str(
-            read_menu(
-                SERVICE,
-                SPREADSHEET_ID,
-                SPREADSHEET_RANGE_RECIPES,
-                SPREADSHEET_RANGE_INGREDIENTS,
-            ),
+            MENU,
             menu_title=text,
         )
         + str_to_markdown(f"\n\n UPD: {datetime.now()}"),
@@ -85,12 +84,7 @@ async def show_menu(
     query: CallbackQuery,
     text: Optional[str] = "Нажми на коктейль, чтобы узнать подробнее",
 ) -> None:
-    menu = read_menu(
-        SERVICE,
-        SPREADSHEET_ID,
-        SPREADSHEET_RANGE_RECIPES,
-        SPREADSHEET_RANGE_INGREDIENTS,
-    )
+    menu = MENU
     buttons = build_menu_buttons(menu)
     if text is None:
         text = ""
@@ -102,12 +96,7 @@ async def show_menu(
 
 
 async def show_cocktail(query: CallbackQuery) -> None:
-    menu = read_menu(
-        SERVICE,
-        SPREADSHEET_ID,
-        SPREADSHEET_RANGE_RECIPES,
-        SPREADSHEET_RANGE_INGREDIENTS,
-    )
+    menu = MENU
     buttons = InlineKeyboardMarkup(
         [
             [InlineKeyboardButton("Назад", callback_data="action_selection_menu")],
@@ -139,41 +128,66 @@ async def buttons_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     if query.data in FUNCTIONS.keys():
         await FUNCTIONS[query.data](query)  # type: ignore
     else:
-        cocktails_range = read_sheet(SERVICE, SPREADSHEET_ID, SPREADSHEET_RANGE_COCKTAILS).get("values")
-        available_cocktails_range = read_sheet(SERVICE, SPREADSHEET_ID, SPREADSHEET_RANGE_AVAILABLE_COCKTAILS).get(
-            "values"
-        )
-        cocktails = set()
-        available_cocktails = set()
-        if available_cocktails_range is None:
-            LOGGER.error("available_cocktails_range is None")
-            await error(query)
-            return
-        if cocktails_range is None:
-            LOGGER.error("cocktails_range is None")
-            await error(query)
-            return
-        for row in available_cocktails_range:
-            if row[0]:
-                available_cocktails.add(row[0])
-        for row in cocktails_range:
-            if row and row[0]:
-                cocktails.add(row[0])
-        if query.data in available_cocktails:
-            await show_cocktail(query)
-        elif query.data in cocktails:
-            await show_menu(query, "Коктейль закончился :(")
-        else:
-            await error(query)
+        with lock:
+            cocktails_range = read_sheet(SERVICE, SPREADSHEET_ID, SPREADSHEET_RANGE_COCKTAILS).get("values")
+            available_cocktails_range = read_sheet(SERVICE, SPREADSHEET_ID, SPREADSHEET_RANGE_AVAILABLE_COCKTAILS).get(
+                "values"
+            )
+            cocktails = set()
+            available_cocktails = set()
+            if available_cocktails_range is None:
+                LOGGER.error("available_cocktails_range is None")
+                await error(query)
+                return
+            if cocktails_range is None:
+                LOGGER.error("cocktails_range is None")
+                await error(query)
+                return
+            for row in available_cocktails_range:
+                if row[0]:
+                    available_cocktails.add(row[0])
+            for row in cocktails_range:
+                if row and row[0]:
+                    cocktails.add(row[0])
+            if query.data in available_cocktails:
+                await show_cocktail(query)
+            elif query.data in cocktails:
+                await show_menu(query, "Коктейль закончился :(")
+            else:
+                await error(query)
+
+
+def run_google(loop: Optional[bool] = True) -> None:
+    if loop:
+        LOGGER.debug("Menu обновлено")
+    else:
+        LOGGER.info("Меню обновлено")
+    update_menu(SERVICE, SPREADSHEET_ID, SPREADSHEET_RANGE_RECIPES, SPREADSHEET_RANGE_INGREDIENTS)
+    LOGGER.debug(f"MENU: {MENU}")
+    sleep(10)
+    if loop:
+        run_google()
+
+
+def update_menu(service, spreadsheet_id: str, recipe_range: str, ingredients_range: str) -> None:
+    global MENU
+    with lock:
+        LOGGER.debug(MENU)
+        MENU = read_menu(service, spreadsheet_id, recipe_range, ingredients_range)
 
 
 def main() -> None:
     logger_init()
+
+    run_google(False)
+    thread_google = threading.Thread(target=run_google)
+    thread_google.start()
+
+    LOGGER.info("Бот запущен")
     auth_token = os.getenv("TOKEN")
     application = Application.builder().token(auth_token).read_timeout(30).connect_timeout(30).build()
     application.add_handler(CallbackQueryHandler(buttons_handler))
     application.add_handler(CommandHandler("start", wake_up))
-    LOGGER.info("Бот запущен")
     application.run_polling(allowed_updates=Update.ALL_TYPES, timeout=30)
 
 
