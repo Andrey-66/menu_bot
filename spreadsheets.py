@@ -2,10 +2,11 @@ from typing import Any, Dict, Tuple
 
 from constants import GOOGLE_CREDENTIALS_FILE, GOOGLE_SCOPES
 from google.oauth2.service_account import Credentials
-from google.protobuf.service import Service
 from googleapiclient import discovery
 from logger import LOGGER
 from utils import range_to_dict
+
+from google.protobuf.service import Service  # type: ignore # isort:skip
 
 
 def google_auth() -> Tuple[Service, Credentials]:
